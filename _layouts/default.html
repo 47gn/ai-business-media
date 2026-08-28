@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'ja' }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+    <meta name="description" content="{{ page.description | default: site.description }}">
+  </head>
+  <body>
+    <header>
+      <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
+      <nav aria-label="メインメニュー">
+        <a href="{{ '/about/' | relative_url }}">運営方針</a>
+        <a href="{{ '/privacy/' | relative_url }}">プライバシー</a>
+        <a href="{{ '/contact/' | relative_url }}">お問い合わせ</a>
+      </nav>
+    </header>
+    <main>
+      {{ content }}
+    </main>
+    <footer>
+      <p>掲載内容は公開時点の情報です。重要な判断は公式情報も確認してください。</p>
+    </footer>
+  </body>
+</html>

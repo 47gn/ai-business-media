@@ -1,0 +1,13 @@
+title: AIビジネス研究室
+description: AIと自動化を、実務で役立つ形に整理するメディア
+lang: ja
+timezone: Asia/Tokyo
+markdown: kramdown
+permalink: /:categories/:year/:month/:day/:title/
+plugins: []
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
