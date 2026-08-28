@@ -6,6 +6,7 @@ import csv
 import os
 import re
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -17,6 +18,7 @@ MIN_CHARS = 1500
 MAX_CHARS = 3200
 MAX_GENERATION_ATTEMPTS = 3
 MAX_OUTPUT_TOKENS = 4000
+MAX_API_RETRIES = 3
 BANNED_PATTERNS = ("必ず稼げ", "絶対に稼げ", "誰でも簡単に", "放置で月", "コピペだけで")
 REQUIRED_HEADINGS = ("結論", "具体的な進め方", "注意点", "よくある質問", "まとめ")
 EDITOR_CHECKLIST_HEADING = "公開前に運営者が追記・確認する項目"
@@ -90,13 +92,22 @@ def revision_prompt(article: str, errors: list[str]) -> str:
 
 
 def generate_article(client: object, prompt: str, config: object) -> str:
-    """Generate text and normalise the occasional Markdown code fence."""
-    response = client.models.generate_content(
-        model=MODEL,
-        contents=prompt,
-        config=config,
-    )
-    return clean_markdown(response.text or "")
+    """Generate text, retrying temporary Gemini capacity errors."""
+    for attempt in range(1, MAX_API_RETRIES + 1):
+        try:
+            response = client.models.generate_content(
+                model=MODEL,
+                contents=prompt,
+                config=config,
+            )
+            return clean_markdown(response.text or "")
+        except Exception as error:
+            if getattr(error, "code", None) != 503 or attempt == MAX_API_RETRIES:
+                raise
+            wait_seconds = attempt * 10
+            print(f"Geminiが混雑しています。{wait_seconds}秒後に再試行します（{attempt}/{MAX_API_RETRIES}）。")
+            time.sleep(wait_seconds)
+    raise RuntimeError("Geminiから応答を取得できませんでした。")
 
 
 def article_body_without_title(article: str) -> str:
