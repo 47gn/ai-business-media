@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 KEYWORDS_FILE = BASE_DIR / "keywords.csv"
 DRAFTS_DIR = BASE_DIR / "_drafts"
 POSTS_DIR = BASE_DIR / "_posts"
+PC_PARTS_FILE = BASE_DIR / "data" / "pc_parts.csv"
 MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 MIN_CHARS = 1500
 MAX_CHARS = 3200
@@ -49,7 +50,8 @@ def update_status(keyword: str, status: str) -> None:
 
 
 def build_prompt(item: dict[str, str]) -> str:
-    return f"""あなたは日本語の実務メディアの編集者です。次のキーワードについて、公開前に人間が独自の経験・検証結果・一次情報を追記するための下書きをMarkdownで作成してください。
+    research_context = load_pc_research_context()
+    return f"""あなたは日本語のPCパーツ専門メディアの編集者です。次のキーワードについて、公開前に人間が検証結果・一次情報を追記するための下書きをMarkdownで作成してください。
 
 キーワード: {item['keyword']}
 カテゴリ: {item.get('category', '')}
@@ -61,11 +63,29 @@ def build_prompt(item: dict[str, str]) -> str:
 - H1は1つだけ。続いて導入、H2の「結論」「具体的な進め方」「注意点」「よくある質問」「まとめ」を含める
 - 事実・価格・仕様・法律・規約など、確認が必要なことは断定せず「公式情報を確認してください」と明示する
 - 実在しない事例、数値、機能、引用、体験談を作らない
+- 価格、在庫、性能比較、ランキングは、下記の確認済みデータにない限り断定しない。根拠がない箇所は「公開前に公式情報・実売価格・測定条件を確認してください」と明記する
+- 性能差は用途、解像度、ゲーム設定、ベンチマーク条件、消費電力、対応規格など、比較条件を揃えずに断定しない
 - 誇大表現や、収益を保証する表現をしない
 - 他サイトの文を模倣しない
 - 末尾に「## 公開前に運営者が追記・確認する項目」を置き、一次情報、実体験、更新日を確認するチェック項目を3つ以上書く
 - 記事本文だけをMarkdownで出力する。コードフェンスは不要
+
+確認済みPCパーツデータ（空欄の場合、推測で補完しない）:
+{research_context}
 """
+
+
+def load_pc_research_context() -> str:
+    if not PC_PARTS_FILE.exists():
+        return "登録なし"
+    with PC_PARTS_FILE.open(encoding="utf-8-sig", newline="") as source:
+        rows = list(csv.DictReader(source))
+    if not rows:
+        return "登録なし"
+    return "\n".join(
+        " | ".join(f"{key}: {value}" for key, value in row.items() if value)
+        for row in rows
+    )
 
 
 def clean_markdown(text: str) -> str:
