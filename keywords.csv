@@ -2,5 +2,5 @@ keyword,status,category,notes
 GPU 選び方 2026,draft,pc-hardware,公式仕様と確認日付きの市場価格を追記。用途別のVRAM目安を明記
 CPU ゲーミング 性能差,draft,pc-hardware,公式仕様と同一条件のベンチマークを確認。用途別に比較
 DDR5 メモリ 選び方,draft,pc-hardware,対応規格とマザーボード互換性を公式情報で確認
-SSD 1TB 選び方,unused,pc-hardware,PCIe世代・TBW・実売価格の確認日を明記
+SSD 1TB 選び方,draft,pc-hardware,PCIe世代・TBW・実売価格の確認日を明記
 自作PC 電源ユニット 選び方,unused,pc-hardware,ATX規格・コネクタ・必要容量を公式仕様で確認
